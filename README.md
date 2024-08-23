@@ -1,1 +1,0 @@
-# CODTECK-TASK-2-AI

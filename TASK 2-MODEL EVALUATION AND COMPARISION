@@ -1,0 +1,144 @@
+# CODTECH-TASK-2-AI
+MODEL EVALUATION AND COMPARISION
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report
+# Load dataset (e.g., Iris dataset)
+from sklearn.datasets import load_iris
+data = load_iris()
+X = pd.DataFrame(data.data, columns=data.feature_names)
+y = pd.Series(data.target)
+
+# Split data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+# Initialize models
+rf_model = RandomForestClassifier(random_state=42)
+svm_model = SVC(random_state=42)
+
+# Train the models
+rf_model.fit(X_train, y_train)
+svm_model.fit(X_train, y_train)
+# Make predictions on the test set
+rf_predictions = rf_model.predict(X_test)
+svm_predictions = svm_model.predict(X_test)
+# Function to calculate and display evaluation metrics
+def evaluate_model(y_true, y_pred, model_name):
+    print(f"--- {model_name} Performance ---")
+    print(f"Accuracy: {accuracy_score(y_true, y_pred):.4f}")
+    print(f"Precision: {precision_score(y_true, y_pred, average='weighted'):.4f}")
+    print(f"Recall: {recall_score(y_true, y_pred, average='weighted'):.4f}")
+    print(f"F1-Score: {f1_score(y_true, y_pred, average='weighted'):.4f}")
+    print("\nClassification Report:\n", classification_report(y_true, y_pred))
+
+# Evaluate Random Forest
+evaluate_model(y_test, rf_predictions, "Random Forest")
+
+# Evaluate SVM
+evaluate_model(y_test, svm_predictions, "SVM")
+import matplotlib.pyplot as plt
+import seaborn as sns
+# Store evaluation metrics in a dictionary
+model_metrics = {
+    "Model": ["Random Forest", "SVM"],
+    "Accuracy": [accuracy_score(y_test, rf_predictions), accuracy_score(y_test, svm_predictions)],
+    "Precision": [precision_score(y_test, rf_predictions, average='weighted'), precision_score(y_test, svm_predictions, average='weighted')],
+    "Recall": [recall_score(y_test, rf_predictions, average='weighted'), recall_score(y_test, svm_predictions, average='weighted')],
+    "F1-Score": [f1_score(y_test, rf_predictions, average='weighted'), f1_score(y_test, svm_predictions, average='weighted')]
+}
+
+# Convert the dictionary to a DataFrame for easier plotting
+metrics_df = pd.DataFrame(model_metrics)
+# Set up the figure and axes
+plt.figure(figsize=(10, 7))
+
+# Plot the metrics
+sns.barplot(x="Model", y="Accuracy", data=metrics_df, color="skyblue", label="Accuracy")
+sns.barplot(x="Model", y="Precision", data=metrics_df, color="lightgreen", label="Precision", alpha=0.7)
+sns.barplot(x="Model", y="Recall", data=metrics_df, color="salmon", label="Recall", alpha=0.5)
+sns.barplot(x="Model", y="F1-Score", data=metrics_df, color="orange", label="F1-Score", alpha=0.3)
+
+# Add labels and title
+plt.title("Comparison of Evaluation Metrics for Random Forest and SVM")
+plt.ylabel("Score")
+plt.legend(loc="upper right")
+
+# Display the plot
+plt.show()
+# Set up the figure and axes
+plt.figure(figsize=(10, 6))
+
+# Plot accuracy vs. F1-score for each model
+plt.scatter(metrics_df["Accuracy"], metrics_df["F1-Score"], color="blue", label="F1-Score", s=100)
+plt.scatter(metrics_df["Accuracy"], metrics_df["Precision"], color="green", label="Precision", s=100)
+plt.scatter(metrics_df["Accuracy"], metrics_df["Recall"], color="red", label="Recall", s=100)
+
+# Annotate points with model names
+for i in range(metrics_df.shape[0]):
+    plt.text(metrics_df["Accuracy"][i] + 0.002, metrics_df["F1-Score"][i], metrics_df["Model"][i], fontsize=12)
+    plt.text(metrics_df["Accuracy"][i] + 0.002, metrics_df["Precision"][i], metrics_df["Model"][i], fontsize=12)
+    plt.text(metrics_df["Accuracy"][i] + 0.002, metrics_df["Recall"][i], metrics_df["Model"][i], fontsize=12)
+
+# Add labels and title
+plt.xlabel("Accuracy")
+plt.ylabel("Scores")
+plt.title("Scatter Plot of Evaluation Metrics for Random Forest and SVM")
+plt.legend(loc="best")
+
+# Display the plot
+plt.show()
+# Set up the figure and axes
+plt.figure(figsize=(8, 6))
+
+# Scatter plot for Precision vs. Accuracy
+plt.scatter(metrics_df["Precision"], metrics_df["Accuracy"], color="green", s=100)
+
+# Annotate points with model names
+for i in range(metrics_df.shape[0]):
+    plt.text(metrics_df["Precision"][i] + 0.002, metrics_df["Accuracy"][i], metrics_df["Model"][i], fontsize=12)
+
+# Add labels and title
+plt.xlabel("Precision")
+plt.ylabel("Accuracy")
+plt.title("Scatter Plot of Precision vs. Accuracy for Random Forest and SVM")
+
+# Display the plot
+plt.show()
+# Set up the figure
+plt.figure(figsize=(8, 6))
+
+# Plot the histogram for precision
+plt.hist(metrics_df["Precision"], bins=5, color="green", alpha=0.7, edgecolor="black")
+
+# Add labels and title
+plt.xlabel("Precision")
+plt.ylabel("Frequency")
+plt.title("Histogram of Precision for Random Forest and SVM")
+
+# Display the plot
+plt.show()
+# Set up the figure
+plt.figure(figsize=(10, 7))
+
+# Plot the metrics for each model
+plt.plot(metrics_df["Model"], metrics_df["Precision"], marker='o', color='green', label="Precision")
+plt.plot(metrics_df["Model"], metrics_df["Accuracy"], marker='o', color='blue', label="Accuracy")
+plt.plot(metrics_df["Model"], metrics_df["Recall"], marker='o', color='red', label="Recall")
+plt.plot(metrics_df["Model"], metrics_df["F1-Score"], marker='o', color='orange', label="F1-Score")
+
+# Add labels and title
+plt.xlabel("Model")
+plt.ylabel("Score")
+plt.title("Line Plot of Evaluation Metrics for Random Forest and SVM")
+plt.legend(loc="best")
+
+# Display the plot
+plt.show()
